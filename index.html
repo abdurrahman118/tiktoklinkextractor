@@ -21,39 +21,47 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById("tiktokForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const username = document.getElementById("username").value;
-            const resultsDiv = document.getElementById("results");
-
-            resultsDiv.innerHTML = "<p class='loading'>⏳ Fetching links...</p>";
-
-            try {
-                const response = await fetch("/get-links", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: `username=${encodeURIComponent(username)}`
-                });
-
-                const data = await response.json();
-
-                if (data.links.length > 0) {
-                    let html = "<h2>🎬 Found Videos:</h2><ul>";
-                    data.links.forEach(link => {
-                        html += `<li><a href="${link}" target="_blank">${link}</a></li>`;
-                    });
-                    html += "</ul>";
-                    resultsDiv.innerHTML = html;
-                } else {
-                    resultsDiv.innerHTML = "<p class='error'>❌ No videos found. Check the username!</p>";
-                }
-            } catch (error) {
-                resultsDiv.innerHTML = `<p class='error'>❌ Error: ${error.message}</p>`;
-            }
+  document.getElementById("tiktokForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const resultsDiv = document.getElementById("results");
+    
+    resultsDiv.innerHTML = "<p class='loading'>⏳ Fetching links...</p>";
+    
+    try {
+        const response = await fetch("/get-links", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `username=${encodeURIComponent(username)}`
         });
-    </script>
-</body>
+        
+        // Check if response is JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Server returned non-JSON response");
+        }
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || "Unknown error occurred");
+        }
+        
+        if (data.links && data.links.length > 0) {
+            let html = "<h2>🎬 Found Videos:</h2><ul>";
+            data.links.forEach(link => {
+                html += `<li><a href="${link}" target="_blank">${link}</a></li>`;
+            });
+            html += "</ul>";
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = "<p class='error'>❌ No videos found</p>";
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `<p class='error'>❌ Error: ${error.message}</p>`;
+        console.error("Fetch error:", error);
+    }
+});
 </html>
