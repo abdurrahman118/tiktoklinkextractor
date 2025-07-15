@@ -1,1 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚀 TikTok Link Extractor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TikTok Video Link Extractor</h1>
+        <form id="tiktokForm">
+            <input 
+                type="text" 
+                id="username" 
+                placeholder="@username" 
+                required
+            >
+            <button type="submit">Get Links</button>
+        </form>
+        <div id="results">
+            <!-- Results appear here -->
+        </div>
+    </div>
 
+    <script>
+        document.getElementById("tiktokForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const resultsDiv = document.getElementById("results");
+
+            resultsDiv.innerHTML = "<p class='loading'>⏳ Fetching links...</p>";
+
+            try {
+                const response = await fetch("/get-links", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `username=${encodeURIComponent(username)}`
+                });
+
+                const data = await response.json();
+
+                if (data.links.length > 0) {
+                    let html = "<h2>🎬 Found Videos:</h2><ul>";
+                    data.links.forEach(link => {
+                        html += `<li><a href="${link}" target="_blank">${link}</a></li>`;
+                    });
+                    html += "</ul>";
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = "<p class='error'>❌ No videos found. Check the username!</p>";
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class='error'>❌ Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
