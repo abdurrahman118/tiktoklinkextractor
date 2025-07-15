@@ -25,9 +25,9 @@
     e.preventDefault();
     const username = document.getElementById("username").value;
     const resultsDiv = document.getElementById("results");
-    
+
     resultsDiv.innerHTML = "<p class='loading'>⏳ Fetching links...</p>";
-    
+
     try {
         const response = await fetch("/get-links", {
             method: "POST",
@@ -36,19 +36,19 @@
             },
             body: `username=${encodeURIComponent(username)}`
         });
-        
+
         // Check if response is JSON
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
             throw new Error("Server returned non-JSON response");
         }
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.error || "Unknown error occurred");
         }
-        
+
         if (data.links && data.links.length > 0) {
             let html = "<h2>🎬 Found Videos:</h2><ul>";
             data.links.forEach(link => {
