@@ -1,30 +1,17 @@
-from flask import Flask, render_template, request, jsonify
-import requests  # For TikTok API calls
-
-app = Flask(__name__)
-
-# Mock function (replace with real TikTok API)
-def get_tiktok_video_links(username):
-    # Simulate API delay
-    import time
-    time.sleep(2)
-
-    # Mock data for demo
-    return [
-        f"https://www.tiktok.com/@{username}/video/7268028301785206021",
-        f"https://www.tiktok.com/@{username}/video/7268028301785206022",
-        f"https://www.tiktok.com/@{username}/video/7268028301785206023",
-    ]
-
-@app.route("/")
-def home():
-    return render_template("index.html")
-
 @app.route("/get-links", methods=["POST"])
 def api_get_links():
-    username = request.form["username"].replace("@", "")
-    links = get_tiktok_video_links(username)
-    return jsonify({"links": links})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    try:
+        username = request.form["username"].replace("@", "").strip()
+        if not username:
+            return jsonify({"error": "Username cannot be empty"}), 400
+            
+        # Replace this with real TikTok API calls
+        links = [
+            f"https://www.tiktok.com/@{username}/video/7268028301785206021",
+            f"https://www.tiktok.com/@{username}/video/7268028301785206022"
+        ]
+        
+        return jsonify({"links": links})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
